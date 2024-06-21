@@ -66,11 +66,13 @@ func (c *Combustion) configureRPMs(ctx *image.Context) ([]string, error) {
 		return nil, fmt.Errorf("resolving rpm/package dependencies: %w", err)
 	}
 
+	log.Audit("Creating resolved rpm repository...")
 	if err = c.RPMRepoCreator.Create(repoPath); err != nil {
 		log.AuditComponentFailed(rpmComponentName)
 		return nil, fmt.Errorf("creating resolved rpm repository: %w", err)
 	}
 
+	log.Audit("writing the RPM install script...")
 	script, err := writeRPMScript(ctx, repoPath, pkgsList)
 	if err != nil {
 		log.AuditComponentFailed(rpmComponentName)
