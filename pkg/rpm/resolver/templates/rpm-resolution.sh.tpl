@@ -1,5 +1,5 @@
 #!/bin/bash
-set -euo pipefail
+set -euxo pipefail
 
 #  Template Fields
 #  RegCode      - scc.suse.com registration code
