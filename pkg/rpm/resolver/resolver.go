@@ -81,6 +81,7 @@ func New(workDir string, podman Podman, baseImageBuilder BaseResolverImageBuilde
 func (r *Resolver) Resolve(packages *image.Packages, localRPMConfig *image.LocalRPMConfig, outputDir string) (rpmDirPath string, pkgList []string, err error) {
 	zap.L().Info("Resolving package dependencies...")
 
+	zap.L().Info("Disable default mounts...")
 	revert, err := mount.DisableDefaultMounts(r.overrideMountsPath)
 	if err != nil {
 		return "", nil, fmt.Errorf("temporary disabling automatic volume mounts: %w", err)
@@ -91,23 +92,28 @@ func (r *Resolver) Resolve(packages *image.Packages, localRPMConfig *image.Local
 		}
 	}()
 
+	zap.L().Info("Building base resolver image")
 	if r.baseImageRef, err = r.baseResolverImageBuilder.Build(); err != nil {
 		return "", nil, fmt.Errorf("building base resolver image: %w", err)
 	}
 
+	zap.L().Info("Generating context for the resolver image")
 	if err = r.prepare(localRPMConfig, packages); err != nil {
 		return "", nil, fmt.Errorf("generating context for the resolver image: %w", err)
 	}
 
+	zap.L().Info("Building resolver image")
 	if err = r.podman.Build(r.generateBuildContextPath(), resolverImageRef); err != nil {
 		return "", nil, fmt.Errorf("building resolver image: %w", err)
 	}
 
+	zap.L().Info("Run container from resolver image")
 	id, err := r.podman.Create(resolverImageRef)
 	if err != nil {
 		return "", nil, fmt.Errorf("run container from resolver image %s: %w", resolverImageRef, err)
 	}
 
+	zap.L().Info("Copying resolved package cache")
 	err = r.podman.Copy(id, r.generateResolverImgRPMRepoPath(), outputDir)
 	if err != nil {
 		return "", nil, fmt.Errorf("copying resolved package cache to %s: %w", outputDir, err)
