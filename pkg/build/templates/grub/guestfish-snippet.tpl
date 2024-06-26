@@ -2,7 +2,7 @@
 # - Without this, the values wouldn't be used until after the first time the
 #   grub configuration is regenerated
 download /boot/grub2/grub.cfg /tmp/grub.cfg
-! sed -i '/ignition.platform/ s/$/ {{.KernelArgs}} /' /tmp/grub.cfg
+! sed -i '/${extra_cmdline}/ s/$/ {{.KernelArgs}} /' /tmp/grub.cfg
 upload /tmp/grub.cfg /boot/grub2/grub.cfg
 
 # Configure GRUB defaults

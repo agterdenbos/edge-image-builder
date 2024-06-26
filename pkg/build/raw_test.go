@@ -76,7 +76,7 @@ func TestWriteModifyScript(t *testing.T) {
 				fmt.Sprintf("copy-in %s", builder.context.CombustionDir),
 				"download /boot/grub2/grub.cfg /tmp/grub.cfg",
 				"btrfs filesystem label / INSTALL",
-				"sed -i '/ignition.platform/ s/$/ alpha beta /' /tmp/grub.cfg",
+				"sed -i '/${extra_cmdline}/ s/$/ alpha beta /' /tmp/grub.cfg",
 				"truncate -s 64G",
 				"virt-resize --expand /dev/sda3",
 			},
@@ -89,7 +89,7 @@ func TestWriteModifyScript(t *testing.T) {
 			expectedContains: []string{
 				fmt.Sprintf("guestfish --blocksize=$BLOCKSIZE --format=raw --rw -a %s", outputImageFilename),
 				"download /boot/grub2/grub.cfg /tmp/grub.cfg",
-				"sed -i '/ignition.platform/ s/$/ alpha beta /' /tmp/grub.cfg",
+				"sed -i '/${extra_cmdline}/ s/$/ alpha beta /' /tmp/grub.cfg",
 			},
 			expectedMissing: []string{
 				fmt.Sprintf("copy-in %s", builder.context.CombustionDir),
